@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { FiUser, FiLogOut, FiLogIn, FiLock, FiLoader } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiLogIn, FiLoader } from 'react-icons/fi';
 
 export default function Header() {
     const { status, data } = useSession();
@@ -48,9 +48,9 @@ export default function Header() {
                         </Link>
                         <button
                             onClick={handleSignOut}
-                            className={"flex items-center gap-2 cursor-pointer"}
+                            className={"cursor-pointer"}
                         >
-                            <FiLogOut size={28} color={"#4b5563"} />
+                            <FiLogOut size={28} color={"#c10007"} />
                         </button>
                     </div>
                 )}

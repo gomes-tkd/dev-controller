@@ -1,9 +1,20 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { FiUser, FiLogOut, FiLogIn, FiLock } from 'react-icons/fi';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import { FiUser, FiLogOut, FiLogIn, FiLock, FiLoader } from 'react-icons/fi';
 
 export default function Header() {
+    const { status, data } = useSession();
+
+    async function handleSignIn() {
+        await signIn();
+    }
+
+    async function handleSignOut() {
+        await signOut();
+    }
+
     return (
         <header
             className={"w-full flex items-center px-2 py-4 bg-white h-20 shadow-sm"}
@@ -15,14 +26,34 @@ export default function Header() {
                     </h1>
                 </Link>
 
-                <div className={"flex items-baseline gap-4"}>
-                    <Link href={"/dashboard"}>
-                        <FiUser size={28} color={"#4b5563"} />
-                    </Link>
-                    <button>
-                        <FiLogOut size={28} color={"#4b5563"} />
+                {(status === "loading") && (
+                    <button className={"animate-spin"}>
+                        <FiLoader size={28} color={"#4b5563"} />
                     </button>
-                </div>
+                )}
+
+                {(status === "unauthenticated") && (
+                    <button
+                        onClick={handleSignIn}
+                        className={"cursor-pointer flex items-center gap-2"}
+                    >
+                        <FiLogIn size={28} color={"#4b5563"} /> Entrar
+                    </button>
+                )}
+
+                {(status === "authenticated") && (
+                    <div className={"flex items-baseline gap-4"}>
+                        <Link href={"/dashboard"}>
+                            <FiUser size={28} color={"#4b5563"} />
+                        </Link>
+                        <button
+                            onClick={handleSignOut}
+                            className={"flex items-center gap-2 cursor-pointer"}
+                        >
+                            <FiLogOut size={28} color={"#4b5563"} />
+                        </button>
+                    </div>
+                )}
             </div>
         </header>
     );

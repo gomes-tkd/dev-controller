@@ -17,8 +17,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Dev Controle - Seu sistema de gerenciamento.",
-  description: "Gerencie seus clientes e atendimentos de forma mais simples e segura. " +
-      "SITE FICTÍCIO PARA PROJETO ACADÊMICO.",
+  description:
+    "Gerencie seus clientes e atendimentos de forma mais simples e segura. " +
+    "SITE FICTÍCIO PARA PROJETO ACADÊMICO.",
 };
 
 export default function RootLayout({
@@ -33,7 +34,7 @@ export default function RootLayout({
       >
         <Header />
         {children}
-      <Footer />
+        <Footer />
       </body>
     </html>
   );

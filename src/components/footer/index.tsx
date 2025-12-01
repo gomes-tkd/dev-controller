@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer
       className={
-        "w-full flex items-center px-4 py-4 bg-white h-20 shadow-[0_-5px_10px_rgba(0,0,0,0.1)] relative z-50"
+        "w-full flex items-center mt-3 px-4 py-4 bg-white h-20 shadow-[0_-5px_10px_rgba(0,0,0,0.1)] relative z-50"
       }
     >
       <div

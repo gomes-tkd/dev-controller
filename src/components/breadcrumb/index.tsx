@@ -16,7 +16,7 @@ export default function Breadcrumb() {
     return (
         <nav aria-label={"Breadcrumb"} className={"flex items-center text-sm text-slate-500"}>
             <Link
-                href={"/public"}
+                href={"/dashboard"}
                 className={"hover:text-blue-600 transition-colors flex items-center gap-1 group"}
                 title={"Ir para o início"}
             >

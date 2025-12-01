@@ -4,21 +4,19 @@ import HomeImage from "@/assets/hero-image.svg";
 
 export default function Home() {
   return (
-    <main
-      className={
-        "flex items-center flex-col justify-center min-h-[calc(100vh-5rem)]"
-      }
-    >
-      <h2 className={"font-medium text-2xl mb-2"}>Gerencie sua empresa</h2>
-      <h1 className={"font-bold text-3xl mb-8 text-blue-600 mb:text-4xl"}>
-        Atendimentos, clientes
-      </h1>
-      <Image
-        src={HomeImage}
-        alt={"Dev Controle - Banner Home"}
-        width={600}
-        className={"max-w-sm md:max-w-xl"}
-      />
-    </main>
+      <main className={"flex flex-col items-center justify-center w-full py-20"}>
+          <h2 className={"font-medium text-2xl mb-2"}>Gerencie sua empresa</h2>
+          <h1 className={"font-bold text-3xl text-blue-600 mb-8"}>Atendimentos, clientes</h1>
+          <div className={"relative w-full max-w-sm md:max-w-md lg:max-w-lg"}>
+              <Image
+                  src={HomeImage}
+                  alt={"Imagem Hero"}
+                  width={600}
+                  height={600}
+                  className={"object-contain"}
+                  priority
+              />
+          </div>
+      </main>
   );
 }

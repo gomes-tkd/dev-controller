@@ -6,38 +6,47 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/input";
 import { toast } from "sonner";
 import { FiLoader } from "react-icons/fi";
-// Importamos o schema e o tipo de fora
 import { customerSchema, CustomerData } from "@/lib/schema";
+import apiAxios from "@/lib/api";
+import { useRouter } from "next/navigation";
 
-export default function NewCustomerForm() {
+export default function NewCustomerForm({ userId }: { userId: string }) {
+    const router = useRouter();
+
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-        setValue // Usaremos isso para aplicar a máscara
+        setValue
     } = useForm<CustomerData>({
-        resolver: zodResolver(customerSchema) // Usando o schema importado
+        resolver: zodResolver(customerSchema)
     });
 
-    // Função auxiliar simples para máscara de telefone (PT-BR)
     const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         let value = event.target.value;
-        // Remove tudo que não é número
         value = value.replace(/\D/g, "");
-        // (99) 99999-9999
         value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
         value = value.replace(/(\d)(\d{4})$/, "$1-$2");
 
-        // Atualiza o valor no React Hook Form manualmente
         setValue("phone", value);
     };
 
+    function delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function handleRegisterCustomer(data: CustomerData) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log(data);
+        await apiAxios.post("/api/customer", {
+            ...data,
+            userId
+        });
+
         toast.success("Cliente cadastrado com sucesso!");
         reset();
+
+        await delay(2000);
+        router.replace("/dashboard/customer");
     }
 
     return (
@@ -46,13 +55,6 @@ export default function NewCustomerForm() {
             onSubmit={handleSubmit(handleRegisterCustomer)}
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-                {/* NOTA: Removi o .map() por um momento para te mostrar como aplicar
-                   a máscara no telefone explicitamente. O .map() é bom, mas
-                   quando um campo precisa de comportamento especial (onChange customizado),
-                   o código explícito é mais legível e seguro.
-                */}
-
                 <Input<CustomerData>
                     name="name"
                     label="Nome completo"
@@ -63,7 +65,6 @@ export default function NewCustomerForm() {
                     className="sm:col-span-2"
                 />
 
-                {/* CAMPO TELEFONE COM MÁSCARA */}
                 <div className="w-full">
                     <label className="block mb-2 text-sm font-medium text-slate-700">Telefone</label>
                     <input
@@ -74,9 +75,8 @@ export default function NewCustomerForm() {
                         }`}
                         placeholder="(DD) 99999-9999"
                         type="text"
-                        // Aqui fazemos a junção do register com nossa máscara
                         {...register("phone", {
-                            onChange: handlePhoneChange // Aplica a máscara a cada tecla
+                            onChange: handlePhoneChange
                         })}
                     />
                     {errors.phone && (
@@ -106,10 +106,10 @@ export default function NewCustomerForm() {
             </div>
 
             <button
-                type="submit"
+                type={"submit"}
                 disabled={isSubmitting}
                 className={`
-                    flex items-center justify-center gap-2 h-11 rounded-md text-white font-bold transition-all mt-6
+                    cursor-pointer flex items-center justify-center gap-2 h-11 rounded-md text-white font-bold transition-all mt-6
                     ${isSubmitting ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700"}
                 `}
             >

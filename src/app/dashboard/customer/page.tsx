@@ -4,7 +4,9 @@ import Container from "@/components/ui/container";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import Card, { CustomerProps } from "@/components/card";
+import Card from "@/components/card";
+import CustomerProps from "@/utils/customer.type";
+import prismaClient from "@/lib/prisma";
 
 export default async function CustomerPage() {
     const session = await getServerSession(authOptions);
@@ -13,12 +15,7 @@ export default async function CustomerPage() {
         redirect("/");
     }
 
-    const customers: CustomerProps[] = [
-        { id: 1, name: "Mercado Silva", email: "contato@mercadosilva.com", phone: "54 9999-9999" },
-        { id: 2, name: "Oficina Tech Solutions", email: "pedro@techsolutions.com", phone: "51 8888-8888" },
-        { id: 3, name: "Padaria Central", email: "padaria@gmail.com", phone: "11 7777-7777" },
-        { id: 4, name: "Academia BodyFit", email: "contato@bodyfit.com.br", phone: "21 3333-2222" },
-    ];
+    const customers: CustomerProps[] = await prismaClient.customer.findMany({ where: { userId: session.user.id } });
 
     return (
         <Container>

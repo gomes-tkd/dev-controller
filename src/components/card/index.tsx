@@ -1,9 +1,4 @@
-export interface CustomerProps {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-}
+import CustomerProps from "@/utils/customer.type";
 
 export default function Card({ customer }: { customer: CustomerProps }) {
     return (

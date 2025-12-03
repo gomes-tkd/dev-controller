@@ -40,7 +40,7 @@ export default async function NewCustomerPage() {
                     Preencha os dados abaixo para cadastrar um novo cliente no sistema.
                 </p>
 
-                <NewCustomerForm />
+                <NewCustomerForm userId={session.user.id}/>
             </main>
         </Container>
     );

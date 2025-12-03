@@ -1,17 +1,30 @@
 import React from "react";
 import Container from "@/components/ui/container";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import TicketItem, { TicketProps } from "@/components/dashboard/ticket";
+import { getAuthenticatedUser } from "@/lib/current-user";
 
 export default async function DashboardPage() {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser();
 
-    if (!session || !session.user) {
+    if (!user) {
         redirect("/");
     }
+
+    // const tickets = await prismaClient.ticket.findMany({
+    //     where: {
+    //         customer: {
+    //             userId: user.id // <--- SEGURANÇA: Só traz tickets dos clientes DESTE usuário
+    //         }
+    //     },
+    //     include: {
+    //         customer: true // Traz os dados do cliente junto
+    //     },
+    //     orderBy: {
+    //         created_at: 'desc'
+    //     }
+    // });
 
     const tickets: TicketProps[] = [
         { id: "1", customer: "Mercado Silva", date: "01/04/2024", status: "ABERTO" },

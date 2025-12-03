@@ -7,15 +7,16 @@ import { authOptions } from "@/lib/auth";
 import Card from "@/components/card";
 import CustomerProps from "@/utils/customer.type";
 import prismaClient from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/current-user";
 
 export default async function CustomerPage() {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser();
 
-    if (!session || !session.user) {
+    if (!user) {
         redirect("/");
     }
 
-    const customers: CustomerProps[] = await prismaClient.customer.findMany({ where: { userId: session.user.id } });
+    const customers: CustomerProps[] = await prismaClient.customer.findMany({ where: { userId: user.id } });
 
     return (
         <Container>

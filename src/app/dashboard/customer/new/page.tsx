@@ -1,17 +1,15 @@
 import React from "react";
 import Container from "@/components/ui/container";
 import Link from "next/link";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import NewCustomerForm from "@/components/form";
 import { FiArrowLeft } from "react-icons/fi";
+import {getAuthenticatedUser} from "@/lib/current-user";
 
 export default async function NewCustomerPage() {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser();
 
-    if (!session || !session.user) {
-        redirect("/");
+    if (!user) {
+        return {error: "Não autorizado"};
     }
 
     return (
@@ -40,7 +38,7 @@ export default async function NewCustomerPage() {
                     Preencha os dados abaixo para cadastrar um novo cliente no sistema.
                 </p>
 
-                <NewCustomerForm userId={session.user.id}/>
+                <NewCustomerForm userId={user.id}/>
             </main>
         </Container>
     );

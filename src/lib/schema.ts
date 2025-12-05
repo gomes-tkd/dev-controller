@@ -12,3 +12,11 @@ export const customerSchema = z.object({
 });
 
 export type CustomerData = z.infer<typeof customerSchema>;
+
+export const ticketSchema = z.object({
+    name: z.string().min(1, "O nome do chamado é obrigatório"),
+    description: z.string().min(1, "A descrição do problema é obrigatória"),
+    customerId: z.string().min(1, "Selecione um cliente")
+});
+
+export type TicketData = z.infer<typeof ticketSchema>;

@@ -89,29 +89,12 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
                     <table className="min-w-full divide-y divide-slate-200 bg-white">
                         <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-48">
-                                Cliente
-                            </th>
-
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                Assunto
-                            </th>
-
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell w-32">
-                                Data
-                            </th>
-
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider hidden md:table-cell w-32">
-                                Prioridade
-                            </th>
-
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">
-                                Status
-                            </th>
-
-                            <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider w-24">
-                                Ações
-                            </th>
+                            <th className="px-4 py-3 text-left w-48">Cliente</th>
+                            <th className="px-4 py-3 text-left">Assunto</th>
+                            <th className="hidden px-4 py-3 text-left sm:table-cell w-32">Data</th>
+                            <th className="hidden px-4 py-3 text-left md:table-cell w-32">Prioridade</th>
+                            <th className="px-4 py-3 text-left w-32">Status</th>
+                            <th className="px-4 py-3 text-center w-24">Ações</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200 bg-white">

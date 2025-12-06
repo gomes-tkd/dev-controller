@@ -1,6 +1,7 @@
 "use client";
 
-import { FiTrash2, FiCheckSquare, FiEdit } from "react-icons/fi"; // <--- Importe FiEdit
+import React from "react";
+import { FiTrash2, FiCheckSquare, FiEdit, FiLoader } from "react-icons/fi";
 import TicketProps from "@/utils/ticket-type";
 import { toast } from "sonner";
 import axiosApi from "@/lib/api";
@@ -25,8 +26,8 @@ function TicketBadge({ label }: BadgeProps) {
 
     return (
         <span className={`${currentStyle} px-3 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase`}>
-      {label}
-    </span>
+            {label}
+        </span>
     );
 }
 
@@ -34,14 +35,17 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
     const router = useRouter();
     const [openModalStatus, setOpenModalStatus] = useState(false);
     const [openModalDetails, setOpenModalDetails] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     function handleButtonClick(e: React.MouseEvent, action: () => void) {
         e.stopPropagation();
+        if (isDeleting) return;
         action();
     }
 
     async function handleDelete() {
         try {
+            setIsDeleting(true);
             await axiosApi.delete("/api/ticket", {
                 params: { id: ticket.id }
             });
@@ -50,6 +54,7 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
         } catch (err) {
             console.error(err);
             toast.error("Erro ao deletar.");
+            setIsDeleting(false);
         }
     }
 
@@ -60,13 +65,11 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
     }[ticket.priority] || "bg-gray-50 text-gray-500 border-gray-200";
 
     return (
-        <>
             <tr
                 onClick={() => setOpenModalDetails(true)}
                 className="cursor-pointer border-b border-slate-100 h-16 last:border-b-0 hover:bg-slate-50 transition-colors duration-200 group relative"
             >
                 <td className="text-left px-4 py-3 w-48 align-middle">
-                    {/* truncate: corta o texto se for muito grande */}
                     <div className="font-bold text-slate-900 truncate max-w-[180px]" title={ticket.customer}>
                         {ticket.customer}
                     </div>
@@ -76,7 +79,7 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
                     <div className="font-medium text-slate-700 truncate max-w-[200px] sm:max-w-xs" title={ticket.name}>
                         {ticket.name}
                     </div>
-                    <div className="text-[10px] text-slate-400 sm:hidden">#{ticket.id.slice(0,6)}</div>
+                    <div className="text-[10px] text-slate-400 sm:hidden">#{ticket.id.slice(0, 6)}</div>
                 </td>
 
                 <td className="text-left hidden sm:table-cell px-4 py-3 text-slate-500 text-sm w-32 align-middle">
@@ -84,51 +87,70 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
                 </td>
 
                 <td className="text-left hidden md:table-cell px-4 py-3 w-32 align-middle">
-                <span className={`${priorityColor} px-2 py-1 rounded text-xs font-bold border uppercase inline-block text-center min-w-[70px]`}>
-                    {ticket.priority}
-                </span>
+                    <span className={`${priorityColor} px-2 py-1 rounded text-xs font-bold border uppercase inline-block text-center min-w-[70px]`}>
+                        {ticket.priority}
+                    </span>
                 </td>
 
                 <td className="text-left px-4 py-3 w-32 align-middle">
-                    <TicketBadge label={ticket.status} />
+                    <button onClick={(e) => handleButtonClick(e, () => setOpenModalStatus(true))}>
+                        <TicketBadge label={ticket.status} />
+                    </button>
                 </td>
 
                 <td className="text-right px-4 py-3 w-24 align-middle">
                     <div className="flex items-center justify-end gap-2">
 
                         <button
+                            disabled={isDeleting}
+                            onClick={(e) => handleButtonClick(e, () => setOpenModalStatus(true))}
+                            className="cursor-pointer p-2 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 transition-colors disabled:opacity-50"
+                            title="Alterar Status"
+                        >
+                            <FiCheckSquare size={16} />
+                        </button>
+
+                        <button
+                            disabled={isDeleting}
                             onClick={(e) => handleButtonClick(e, () => router.push(`/dashboard/ticket/${ticket.id}`))}
-                            className="p-2 rounded-full bg-slate-50 hover:bg-blue-100 text-slate-500 hover:text-blue-600 transition-colors"
+                            className="cursor-pointer p-2 rounded-full bg-slate-50 hover:bg-blue-100 text-slate-500 hover:text-blue-600 transition-colors disabled:opacity-50"
+                            title="Editar"
                         >
                             <FiEdit size={16} />
                         </button>
 
                         <button
+                            disabled={isDeleting}
                             onClick={(e) => handleButtonClick(e, handleDelete)}
-                            className="p-2 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                            className="cursor-pointer p-2 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Excluir"
                         >
-                            <FiTrash2 size={16} />
+                            {isDeleting ? (
+                                <FiLoader size={16} className="animate-spin text-red-600" />
+                            ) : (
+                                <FiTrash2 size={16} />
+                            )}
                         </button>
                     </div>
 
-                    {openModalStatus && (
-                        <ModalTicketStatus
-                            ticketId={ticket.id}
-                            customerName={ticket.customer}
-                            currentStatus={ticket.status}
-                            onClose={() => setOpenModalStatus(false)}
-                        />
-                    )}
+                    <div onClick={(e) => e.stopPropagation()} className="cursor-default">
+                        {openModalStatus && (
+                            <ModalTicketStatus
+                                ticketId={ticket.id}
+                                customerName={ticket.customer}
+                                currentStatus={ticket.status}
+                                onClose={() => setOpenModalStatus(false)}
+                            />
+                        )}
 
-                    {openModalDetails && (
-                        <ModalTicketDetails
-                            ticket={ticket}
-                            onClose={() => setOpenModalDetails(false)}
-                        />
-                    )}
-
+                        {openModalDetails && (
+                            <ModalTicketDetails
+                                ticket={ticket}
+                                onClose={() => setOpenModalDetails(false)}
+                            />
+                        )}
+                    </div>
                 </td>
             </tr>
-        </>
     );
 }

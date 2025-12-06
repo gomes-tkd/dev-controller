@@ -88,7 +88,7 @@ export default function Header() {
 
                             <div className={"flex items-center gap-2 sm:gap-4"}>
                                 <Link
-                                    href={"/dashboard"}
+                                    href={"/dashboard/profile"}
                                     className={
                                         "flex items-center gap-3 py-1 px-2 rounded-lg " +
                                         "hover:bg-slate-100 transition-colors duration-200"

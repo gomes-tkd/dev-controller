@@ -21,23 +21,22 @@ export default function ModalTicketDetails({ ticket, onClose }: ModalTicketDetai
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white w-full max-w-2xl rounded-lg shadow-xl animate-in fade-in zoom-in duration-200">
 
-                {/* CABEÇALHO DO MODAL */}
                 <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50 rounded-t-lg">
                     <h2 className="text-lg font-bold text-slate-800">
                         Detalhes do Chamado
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-1 rounded hover:bg-slate-200 transition-colors text-slate-500"
+                        className="cursor-pointer p-1 rounded hover:bg-slate-200 transition-colors text-slate-500"
                     >
                         <FiX size={24} />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-5">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div>
-                            <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide">Cliente</h3>
+                <div className="p-6 space-y-6 text-left">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div className="flex flex-col items-start">
+                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cliente</h3>
                             <p className="text-slate-900 font-bold text-xl">{ticket.customer}</p>
                         </div>
 
@@ -51,35 +50,34 @@ export default function ModalTicketDetails({ ticket, onClose }: ModalTicketDetai
                         </div>
                     </div>
 
-                    <div>
-                        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide">Assunto</h3>
+                    <div className="flex flex-col items-start">
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Assunto</h3>
                         <p className="text-slate-800 font-medium text-lg">{ticket.name}</p>
                     </div>
 
-                    <div className="bg-slate-50 p-4 rounded-md border border-slate-100">
-                        <h3 className="text-sm font-medium text-slate-500 mb-2 uppercase tracking-wide">Descrição do Problema</h3>
-                        <p className="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-slate-50 p-4 rounded-md border border-slate-100 w-full text-left">
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Descrição do Problema</h3>
+                        <p className="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed text-left">
                             {ticket.description}
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-6 pt-2 border-t border-slate-100 mt-2">
+                    <div className="flex items-center gap-8 pt-4 border-t border-slate-100 mt-2">
                         <div>
-                            <span className="text-xs text-slate-400 block">ID do Chamado</span>
+                            <span className="text-xs text-slate-400 block font-bold">ID do Chamado</span>
                             <span className="text-xs text-slate-600 font-mono">{ticket.id}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-slate-400 block">Data de Abertura</span>
+                            <span className="text-xs text-slate-400 block font-bold">Data de Abertura</span>
                             <span className="text-xs text-slate-600">{ticket.date}</span>
                         </div>
                     </div>
-
                 </div>
 
                 <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 rounded-b-lg">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 rounded text-slate-600 hover:bg-slate-200 font-medium text-sm transition-colors"
+                        className="cursor-pointer px-4 py-2 rounded text-slate-600 hover:bg-slate-200 font-medium text-sm transition-colors"
                     >
                         Fechar
                     </button>
@@ -92,7 +90,6 @@ export default function ModalTicketDetails({ ticket, onClose }: ModalTicketDetai
                         Editar Chamado
                     </Link>
                 </div>
-
             </div>
         </div>
     );

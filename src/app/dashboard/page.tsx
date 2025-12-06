@@ -8,6 +8,7 @@ import HeaderSearch from "@/components/dashboard/dashboard-header-search";
 import DashboardCharts from "@/components/dashboard/dashboard-charts";
 import { getAuthenticatedUser } from "@/lib/current-user";
 import getDashboardData  from "@/services/dashboard-service";
+import Pagination from "@/components/dashboard/pagination";
 
 interface DashboardProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -21,10 +22,12 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     }
 
     const params = await searchParams;
-
     const searchText = typeof params.q === 'string' ? params.q : undefined;
 
-    const dashboard = await getDashboardData(user.id, searchText);
+    const page = typeof params.page === 'string' ? Number(params.page) : 1;
+    const currentPage = isNaN(page) || page < 1 ? 1 : page;
+
+    const dashboard = await getDashboardData(user.id, searchText, currentPage);
 
     return (
         <Container>
@@ -32,14 +35,9 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <HeaderSearch />
-
-                        <Link
-                            href="/dashboard/new"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm whitespace-nowrap"
-                        >
+                        <Link href="/dashboard/new" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm whitespace-nowrap">
                             Abrir chamado
                         </Link>
                     </div>
@@ -95,6 +93,14 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
                         </div>
                     )}
                 </div>
+
+                {dashboard.tickets.length > 0 && (
+                    <Pagination
+                        currentPage={dashboard.pagination.currentPage}
+                        totalPages={dashboard.pagination.totalPages}
+                    />
+                )}
+
             </main>
         </Container>
     );

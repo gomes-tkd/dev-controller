@@ -3,32 +3,46 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-    console.log('🌱 Iniciando seed do banco de dados...')
+    const MY_EMAIL = "jgomestkd@gmail.com";
 
-    let user = await prisma.user.findFirst();
+    console.log('🌱 Iniciando seed...')
+
+    const user = await prisma.user.findUnique({
+        where: { email: MY_EMAIL }
+    });
 
     if (!user) {
-        console.log('⚠️ Nenhum usuário encontrado. Criando usuário de teste...')
-        user = await prisma.user.create({
-            data: {
-                name: "Dev Teste",
-                email: "teste@dev.com",
-                image: "https://github.com/shadcn.png",
-            }
-        })
+        console.error(`❌ ERRO CRÍTICO: Usuário ${MY_EMAIL} não encontrado!`);
+        console.error("👉 PASSO 1: Rode o projeto (npm run dev)");
+        console.error("👉 PASSO 2: Faça login no navegador com este email");
+        console.error("👉 PASSO 3: Só depois rode este comando de seed");
+        process.exit(1);
     }
 
-    console.log(`👤 Dados serão vinculados ao usuário: ${user.name} (${user.email})`)
+    console.log(`👤 Usuário encontrado: ${user.name} (${user.id})`)
+    console.log("🧹 Limpando dados antigos deste usuário...")
+
+    await prisma.ticket.deleteMany({ where: { userId: user.id } });
+    await prisma.customer.deleteMany({ where: { userId: user.id } });
 
     const customerNames = [
-        "Mercado Silva", "Padaria do João", "Oficina Mecânica Veloz", "Escritório de Advocacia Santos",
-        "Consultório Dr. Pedro", "Restaurante Sabor Caseiro", "Tech Solutions Ltda", "Academia BodyFit",
-        "Salão de Beleza Glamour", "Farmácia Saúde Total", "Loja de Roupas Fashion", "Supermercado Preço Bom",
-        "Transportadora Rápida", "Colégio Saber", "Pizzaria Napoli", "Pet Shop Amigo Fiel",
-        "Construtora Forte", "Imobiliária Lar Doce Lar", "Cafeteria Aroma", "Livraria Leitura",
-        "Auto Peças Brasil", "Clínica Veterinária", "Hotel Central", "Agência de Viagens Mundo",
-        "Gráfica Expressa", "Floricultura Bela Flor", "Barbearia do Zé", "Estúdio de Pilates",
-        "Doceria Doce Vida", "Loja de Informática Byte"
+        "Mercado Silva", "Padaria do João", "Açougue Boi Gordo", "Farmácia Saúde Total",
+        "Quitanda da Maria", "Floricultura Bela Flor", "Barbearia do Zé", "Salão de Beleza Glamour",
+        "Lavanderia Bolha Azul", "Pet Shop Amigo Fiel", "Papelaria Escolar", "Banca de Jornal Central",
+        "Oficina Mecânica Veloz", "Escritório de Advocacia Santos", "Consultório Dr. Pedro",
+        "Clínica Veterinária Vida", "Estúdio de Pilates Corpo", "Academia BodyFit",
+        "Auto Escola Direção", "Despachante Rápido", "Imobiliária Lar Doce Lar",
+        "Seguradora Confiança", "Gráfica Expressa", "Assistência Técnica Celular",
+        "Restaurante Sabor Caseiro", "Pizzaria Napoli", "Hamburgueria Top", "Sushi Bar Zen",
+        "Cafeteria Aroma", "Doceria Doce Vida", "Sorveteria Gelato", "Churrascaria Gaúcha",
+        "Food Truck do Chef", "Buffet Festa Alegre", "Pastelaria Crocante",
+        "Loja de Roupas Fashion", "Sapataria Conforto", "Ótica Visão Clara", "Joalheria Brilho",
+        "Loja de Informática Byte", "Móveis Planejados Madeira", "Material de Construção Forte",
+        "Auto Peças Brasil", "Livraria Leitura", "Brinquedoteca Feliz", "Loja de Presentes Mágica",
+        "Tech Solutions Ltda", "Construtora Horizonte", "Transportadora Rápida", "Hotel Central",
+        "Agência de Viagens Mundo", "Escola de Idiomas Global", "Colégio Saber", "Faculdade Futuro",
+        "Coworking Espaço", "StartUp Inovação", "Consultoria Financeira Meta", "Agência de Marketing Digital",
+        "Logística Express", "Segurança Forte"
     ];
 
     const ticketDescriptions = [
@@ -43,13 +57,15 @@ async function main() {
 
     let ticketsCreated = 0;
 
+    console.log("🚀 Criando clientes e tickets...")
+
     for (const name of customerNames) {
         const customer = await prisma.customer.create({
             data: {
                 name: name,
-                email: `contato@${name.toLowerCase().replace(/\s+/g, '')}.com`,
+                email: `contato@${name.toLowerCase().replace(/\s+/g, '').replace(/[^\w-]+/g, '')}.com`,
                 phone: "(11) 99999-9999",
-                address: "Rua Exemplo, 123 - Centro",
+                address: "Rua Exemplo, 123",
                 userId: user.id
             }
         });
@@ -60,7 +76,7 @@ async function main() {
             await prisma.ticket.create({
                 data: {
                     name: ticketDescriptions[Math.floor(Math.random() * ticketDescriptions.length)],
-                    description: "O cliente relatou o problema por telefone e aguarda visita técnica urgente.",
+                    description: "Cliente reportou problema técnico e solicita suporte remoto ou presencial.",
                     status: statuses[Math.floor(Math.random() * statuses.length)],
                     priority: priorities[Math.floor(Math.random() * priorities.length)],
                     customerId: customer.id,
@@ -71,9 +87,9 @@ async function main() {
         }
     }
 
-    console.log(`✅ Seed finalizado com sucesso!`)
-    console.log(`📦 Criados ${customerNames.length} Clientes.`)
-    console.log(`🎫 Criados ${ticketsCreated} Tickets.`)
+    console.log(`✅ SUCESSO!`)
+    console.log(`📦 ${customerNames.length} Clientes criados para ${user.email}`)
+    console.log(`🎫 ${ticketsCreated} Tickets criados.`)
 }
 
 main()

@@ -1,7 +1,9 @@
 import prismaClient from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-export default async function getDashboardData(userId: string, searchText?: string) {
+export default async function getDashboardData(userId: string, searchText?: string, page: number = 1) {
+    const ITEMS_PER_PAGE = 10;
+    const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const whereClause: Prisma.TicketWhereInput = {
         customer: {
@@ -12,20 +14,8 @@ export default async function getDashboardData(userId: string, searchText?: stri
     if (searchText) {
         whereClause.AND = {
             OR: [
-                {
-                    name: {
-                        contains: searchText,
-                        mode: 'insensitive'
-                    }
-                },
-                {
-                    customer: {
-                        name: {
-                            contains: searchText,
-                            mode: 'insensitive'
-                        }
-                    }
-                }
+                { name: { contains: searchText, mode: 'insensitive' } },
+                { customer: { name: { contains: searchText, mode: 'insensitive' } } }
             ]
         };
     }
@@ -36,25 +26,19 @@ export default async function getDashboardData(userId: string, searchText?: stri
         openTickets,
         ticketsData,
         ticketsByStatusRaw,
-        topCustomersRaw
+        topCustomersRaw,
+        filteredTicketsCount
     ] = await Promise.all([
-        prismaClient.customer.count({
-            where: { userId }
-        }),
-
-        prismaClient.ticket.count({
-            where: { customer: { userId } }
-        }),
-
-        prismaClient.ticket.count({
-            where: { customer: { userId }, status: "ABERTO" }
-        }),
+        prismaClient.customer.count({ where: { userId } }),
+        prismaClient.ticket.count({ where: { customer: { userId } } }),
+        prismaClient.ticket.count({ where: { customer: { userId }, status: "ABERTO" } }),
 
         prismaClient.ticket.findMany({
             where: whereClause,
             include: { customer: true },
             orderBy: { created_at: 'desc' },
-            take: 10
+            take: ITEMS_PER_PAGE,
+            skip: skip
         }),
 
         prismaClient.ticket.groupBy({
@@ -71,6 +55,10 @@ export default async function getDashboardData(userId: string, searchText?: stri
             },
             take: 5,
             orderBy: { tickets: { _count: 'desc' } }
+        }),
+
+        prismaClient.ticket.count({
+            where: whereClause
         })
     ]);
 
@@ -100,10 +88,12 @@ export default async function getDashboardData(userId: string, searchText?: stri
             totalTickets: totalTickets || 0,
             openTickets: openTickets || 0
         },
-        charts: {
-            status: chartStatusData,
-            customers: chartCustomerData
-        },
-        tickets: tickets
+        charts: { status: chartStatusData, customers: chartCustomerData },
+        tickets: tickets,
+        pagination: {
+            total: filteredTicketsCount,
+            totalPages: Math.ceil(filteredTicketsCount / ITEMS_PER_PAGE),
+            currentPage: page
+        }
     };
 }

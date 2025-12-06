@@ -7,8 +7,8 @@ import axiosApi from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import ModalTicketStatus from "@/providers/modal-ticket-status";
-import ModalTicketDetails from "@/providers/modal-ticket-details";
+import ModalTicketStatus from "@/components/modal/modal-ticket-status/modal-ticket-status";
+import ModalTicketDetails from "@/components/modal/modal-ticket-details/modal-ticket-details";
 
 interface BadgeProps {
     label: string;

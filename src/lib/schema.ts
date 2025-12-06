@@ -16,7 +16,16 @@ export type CustomerData = z.infer<typeof customerSchema>;
 export const ticketSchema = z.object({
     name: z.string().min(1, "O nome do chamado é obrigatório"),
     description: z.string().min(1, "A descrição do problema é obrigatória"),
-    customerId: z.string().min(1, "Selecione um cliente")
+    customerId: z.string().min(1, "Selecione um cliente"),
+
 });
 
 export type TicketData = z.infer<typeof ticketSchema>;
+
+export const ticketPublicSchema = z.object({
+    email: z.string().email("Digite um email válido").min(1, "O email é obrigatório"),
+    name: z.string().min(1, "O título do chamado é obrigatório"), // Nome do chamado
+    description: z.string().min(1, "A descrição é obrigatória")
+});
+
+export type TicketPublicData = z.infer<typeof ticketPublicSchema>;

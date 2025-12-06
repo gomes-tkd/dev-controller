@@ -9,7 +9,6 @@ export default function OpenTicketPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 py-10">
-            {/* CABEÇALHO COMUM */}
             <div className="text-center mb-8">
                 <h1 className="text-3xl font-bold text-blue-600 mb-2">DEVControle</h1>
                 <h2 className="text-xl font-semibold text-slate-800">Central de Suporte</h2>

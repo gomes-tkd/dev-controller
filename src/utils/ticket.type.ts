@@ -4,4 +4,5 @@ export default interface TicketProps {
     description: string;
     date: string | undefined;
     status: string;
+    priority: string;
 }

@@ -8,7 +8,7 @@ interface ModalDetailsProps {
     onClose: () => void;
 }
 
-export default function ModalTicketDetails({ ticket, onClose }: ModalDetailsProps) {
+export default function Index({ ticket, onClose }: ModalDetailsProps) {
     return (
         <div
             className="fixed inset-0 z-[99] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 cursor-default"

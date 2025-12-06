@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ticketSchema, TicketData } from "@/lib/schema";
+import { ticketSchema, TicketData } from "@/lib/schema"; // Importando do arquivo que acabamos de mexer
 import Input from "@/components/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -18,25 +18,32 @@ interface TicketFormProps {
 
 export default function TicketForm({ customers }: TicketFormProps) {
     const router = useRouter();
+
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting }
     } = useForm<TicketData>({
-        resolver: zodResolver(ticketSchema)
+        resolver: zodResolver(ticketSchema),
+        defaultValues: {
+            name: "",
+            description: "",
+            customerId: "",
+            priority: "BAIXA"
+        }
     });
 
     async function handleRegisterTicket(data: TicketData) {
         const result = await createTicket(data);
 
-        if (result.error) {
+        if (result?.error) {
             toast.error(result.error);
             return;
         }
 
         toast.success("Chamado aberto com sucesso!");
         router.refresh();
-        router.replace("/dashboard"); // Redireciona
+        router.replace("/dashboard");
     }
 
     return (
@@ -57,7 +64,7 @@ export default function TicketForm({ customers }: TicketFormProps) {
                 <label className="block mb-2 text-sm font-medium text-slate-700">Descreva o problema</label>
                 <textarea
                     className={`w-full border rounded-md h-24 px-4 py-2 bg-white resize-none transition-all outline-none 
-            ${errors.description
+                    ${errors.description
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                         : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     }`}
@@ -73,7 +80,7 @@ export default function TicketForm({ customers }: TicketFormProps) {
                 <label className="block mb-2 text-sm font-medium text-slate-700">Selecione o cliente</label>
                 <select
                     className={`w-full border rounded-md h-11 px-4 bg-white transition-all outline-none cursor-pointer
-            ${errors.customerId
+                    ${errors.customerId
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                         : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     }`}
@@ -92,14 +99,26 @@ export default function TicketForm({ customers }: TicketFormProps) {
                 )}
             </div>
 
+            <div className="mt-4 mb-2">
+                <label className="block mb-2 text-sm font-medium text-slate-700">Prioridade</label>
+                <select
+                    className="w-full border rounded-md h-11 px-4 bg-white transition-all outline-none cursor-pointer border-slate-300 focus:border-blue-500"
+                    defaultValue="BAIXA"
+                    {...register("priority")}
+                >
+                    <option value="BAIXA">🟢 Baixa</option>
+                    <option value="MEDIA">🟡 Média</option>
+                    <option value="ALTA">🔴 Alta</option>
+                </select>
+            </div>
+
             <button
                 type="submit"
                 disabled={isSubmitting}
                 className={`
-                    cursor-pointer flex items-center justify-center gap-2 h-11 rounded-md text-white font-bold transition-all mt-6
-                    ${isSubmitting ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700"
-                }
-        `}
+                    flex items-center justify-center gap-2 h-11 rounded-md text-white font-bold transition-all mt-6 cursor-pointer
+                    ${isSubmitting ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700"}
+                `}
             >
                 {isSubmitting ? <><FiLoader size={20} className="animate-spin" /> Salvando...</> : "Cadastrar Chamado"}
             </button>

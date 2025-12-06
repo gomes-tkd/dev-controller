@@ -28,6 +28,7 @@ model Ticket {
   name        String
   description String
   status      String
+  priority    String    @default("BAIXA")
   created_at  DateTime? @default(now())
   updated_at  DateTime? @default(now())
 

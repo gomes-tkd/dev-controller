@@ -13,7 +13,7 @@ interface ModalStatusProps {
     onClose: () => void;
 }
 
-export default function ModalTicketStatus({ ticketId, customerName, currentStatus, onClose }: ModalStatusProps) {
+export default function Index({ ticketId, customerName, currentStatus, onClose }: ModalStatusProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState(false);
 

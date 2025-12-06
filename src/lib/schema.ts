@@ -17,14 +17,14 @@ export const ticketSchema = z.object({
     name: z.string().min(1, "O nome do chamado é obrigatório"),
     description: z.string().min(1, "A descrição do problema é obrigatória"),
     customerId: z.string().min(1, "Selecione um cliente"),
-
+    priority: z.enum(["BAIXA", "MEDIA", "ALTA"])
 });
 
 export type TicketData = z.infer<typeof ticketSchema>;
 
 export const ticketPublicSchema = z.object({
     email: z.string().email("Digite um email válido").min(1, "O email é obrigatório"),
-    name: z.string().min(1, "O título do chamado é obrigatório"), // Nome do chamado
+    name: z.string().min(1, "O título do chamado é obrigatório"),
     description: z.string().min(1, "A descrição é obrigatória")
 });
 

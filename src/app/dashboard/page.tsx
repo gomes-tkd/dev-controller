@@ -2,8 +2,9 @@ import React from "react";
 import Container from "@/components/ui/container";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import TicketItem, { TicketProps } from "@/components/dashboard/ticket";
+import TicketItem from "@/components/dashboard/ticket";
 import { getAuthenticatedUser } from "@/lib/current-user";
+import prismaClient from "@/lib/prisma";
 
 export default async function DashboardPage() {
     const user = await getAuthenticatedUser();
@@ -12,26 +13,29 @@ export default async function DashboardPage() {
         redirect("/");
     }
 
-    // const tickets = await prismaClient.ticket.findMany({
-    //     where: {
-    //         customer: {
-    //             userId: user.id // <--- SEGURANÇA: Só traz tickets dos clientes DESTE usuário
-    //         }
-    //     },
-    //     include: {
-    //         customer: true // Traz os dados do cliente junto
-    //     },
-    //     orderBy: {
-    //         created_at: 'desc'
-    //     }
-    // });
+    const ticketsData = await prismaClient.ticket.findMany({
+        where: {
+            customer: {
+                userId: user.id
+            }
+        },
+        include: {
+            customer: true
+        },
+        orderBy: {
+            created_at: "desc"
+        }
+    });
 
-    const tickets: TicketProps[] = [
-        { id: "1", customer: "Mercado Silva", date: "01/04/2024", status: "ABERTO" },
-        { id: "2", customer: "Oficina do Pedro", date: "03/04/2024", status: "PENDENTE" },
-        { id: "3", customer: "Loja de Roupas", date: "05/04/2024", status: "FECHADO" },
-        { id: "4", customer: "Padaria Central", date: "06/04/2024", status: "ABERTO" },
-    ];
+    const tickets = ticketsData.map(ticket => {
+        return {
+            id: ticket.id,
+            customer: ticket.customer?.name,
+            description: ticket.description,
+            date: ticket.created_at?.toLocaleDateString("pt-BR"),
+            status: ticket.status
+        }
+    });
 
     return (
         <Container>

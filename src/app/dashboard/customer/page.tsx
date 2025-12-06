@@ -3,7 +3,7 @@ import Link from "next/link";
 import Container from "@/components/ui/container";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/providers/auth";
 import Card from "@/components/card";
 import CustomerProps from "@/utils/customer.type";
 import prismaClient from "@/lib/prisma";

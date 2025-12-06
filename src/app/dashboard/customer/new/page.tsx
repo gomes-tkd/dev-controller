@@ -3,13 +3,14 @@ import Container from "@/components/ui/container";
 import Link from "next/link";
 import NewCustomerForm from "@/components/form";
 import { FiArrowLeft } from "react-icons/fi";
-import {getAuthenticatedUser} from "@/lib/current-user";
+import { redirect } from "next/navigation";
+import { getAuthenticatedUser } from "@/lib/current-user";
 
 export default async function NewCustomerPage() {
     const user = await getAuthenticatedUser();
 
     if (!user) {
-        return {error: "Não autorizado"};
+        redirect("/");
     }
 
     return (

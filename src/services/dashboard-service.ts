@@ -1,7 +1,13 @@
 import prismaClient from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-export default async function getDashboardData(userId: string, searchText?: string, page: number = 1) {
+export default async function getDashboardData(
+    userId: string,
+    searchText?: string,
+    page: number = 1,
+    status?: string,
+    priority?: string
+) {
     const ITEMS_PER_PAGE = 10;
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
@@ -18,6 +24,14 @@ export default async function getDashboardData(userId: string, searchText?: stri
                 { customer: { name: { contains: searchText, mode: 'insensitive' } } }
             ]
         };
+    }
+
+    if (status && ["ABERTO", "PENDENTE", "FECHADO"].includes(status.toUpperCase())) {
+        whereClause.status = status.toUpperCase();
+    }
+
+    if (priority && ["BAIXA", "MEDIA", "ALTA"].includes(priority.toUpperCase())) {
+        whereClause.priority = priority.toUpperCase();
     }
 
     const [
@@ -46,31 +60,16 @@ export default async function getDashboardData(userId: string, searchText?: stri
             where: { customer: { userId } },
             _count: { status: true }
         }),
-
         prismaClient.customer.findMany({
             where: { userId },
-            select: {
-                name: true,
-                _count: { select: { tickets: true } }
-            },
+            select: { name: true, _count: { select: { tickets: true } } },
             take: 5,
             orderBy: { tickets: { _count: 'desc' } }
         }),
-
         prismaClient.ticket.count({
             where: whereClause
         })
     ]);
-
-    const chartStatusData = ticketsByStatusRaw.map(item => ({
-        name: item.status,
-        value: item._count.status
-    }));
-
-    const chartCustomerData = topCustomersRaw.map(item => ({
-        name: item.name,
-        tickets: item._count.tickets
-    }));
 
     const tickets = ticketsData.map(ticket => ({
         id: ticket.id,
@@ -83,12 +82,8 @@ export default async function getDashboardData(userId: string, searchText?: stri
     }));
 
     return {
-        stats: {
-            totalCustomers: totalCustomers || 0,
-            totalTickets: totalTickets || 0,
-            openTickets: openTickets || 0
-        },
-        charts: { status: chartStatusData, customers: chartCustomerData },
+        stats: { totalCustomers: totalCustomers || 0, totalTickets: totalTickets || 0, openTickets: openTickets || 0 },
+        charts: { status: ticketsByStatusRaw.map(i => ({ name: i.status, value: i._count.status })), customers: topCustomersRaw.map(i => ({ name: i.name, tickets: i._count.tickets })) },
         tickets: tickets,
         pagination: {
             total: filteredTicketsCount,

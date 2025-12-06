@@ -1,11 +1,12 @@
 "use client";
 
-import { FiTrash2, FiCheckSquare } from "react-icons/fi";
-import TicketProps from "@/utils/ticket.type";
+import { FiTrash2, FiCheckSquare, FiEdit } from "react-icons/fi"; // <--- Importe FiEdit
+import TicketProps from "@/utils/ticket-type";
 import { toast } from "sonner";
 import axiosApi from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 import ModalTicketStatus from "@/components/modal/modal-ticket-status";
 import ModalTicketDetails from "@/components/modal/modal-ticket-details";
 
@@ -64,42 +65,49 @@ export default function TicketItem({ ticket }: { ticket: TicketProps }) {
                 onClick={() => setOpenModalDetails(true)}
                 className="cursor-pointer border-b border-slate-100 h-16 last:border-b-0 hover:bg-slate-50 transition-colors duration-200 group relative"
             >
-                <td className="text-left pl-4">
-                    <div className="font-medium text-slate-900">{ticket.customer}</div>
-                    <div className="text-xs text-slate-400 sm:hidden mt-1">ID: {ticket.id}</div>
+                <td className="text-left px-4 py-3 w-48 align-middle">
+                    {/* truncate: corta o texto se for muito grande */}
+                    <div className="font-bold text-slate-900 truncate max-w-[180px]" title={ticket.customer}>
+                        {ticket.customer}
+                    </div>
                 </td>
 
-                <td className="text-left hidden sm:table-cell text-slate-500 text-sm">
+                <td className="text-left px-4 py-3 align-middle">
+                    <div className="font-medium text-slate-700 truncate max-w-[200px] sm:max-w-xs" title={ticket.name}>
+                        {ticket.name}
+                    </div>
+                    <div className="text-[10px] text-slate-400 sm:hidden">#{ticket.id.slice(0,6)}</div>
+                </td>
+
+                <td className="text-left hidden sm:table-cell px-4 py-3 text-slate-500 text-sm w-32 align-middle">
                     {ticket.date}
                 </td>
 
-                <td className="text-left hidden md:table-cell">
-            <span className={`${priorityColor} px-2 py-1 rounded text-xs font-bold border uppercase`}>
-                {ticket.priority}
-            </span>
+                <td className="text-left hidden md:table-cell px-4 py-3 w-32 align-middle">
+                <span className={`${priorityColor} px-2 py-1 rounded text-xs font-bold border uppercase inline-block text-center min-w-[70px]`}>
+                    {ticket.priority}
+                </span>
                 </td>
 
-                <td className="text-left">
+                <td className="text-left px-4 py-3 w-32 align-middle">
                     <TicketBadge label={ticket.status} />
                 </td>
 
-                <td className="text-left">
-                    <div className="flex items-center gap-2">
+                <td className="text-right px-4 py-3 w-24 align-middle">
+                    <div className="flex items-center justify-end gap-2">
 
                         <button
-                            onClick={(e) => handleButtonClick(e, () => setOpenModalStatus(true))}
-                            className="cursor-pointer p-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-500 hover:text-blue-600 transition-colors"
-                            title="Alterar Status"
+                            onClick={(e) => handleButtonClick(e, () => router.push(`/dashboard/ticket/${ticket.id}`))}
+                            className="p-2 rounded-full bg-slate-50 hover:bg-blue-100 text-slate-500 hover:text-blue-600 transition-colors"
                         >
-                            <FiCheckSquare size={18} />
+                            <FiEdit size={16} />
                         </button>
 
                         <button
                             onClick={(e) => handleButtonClick(e, handleDelete)}
-                            className="cursor-pointer p-2 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
-                            title="Excluir"
+                            className="p-2 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
                         >
-                            <FiTrash2 size={18} />
+                            <FiTrash2 size={16} />
                         </button>
                     </div>
 

@@ -7,16 +7,23 @@ import Input from "@/components/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FiLoader } from "react-icons/fi";
-import { createTicket } from "@/actions/ticket";
+import { createTicket, updateTicket } from "@/actions/ticket";
 
 interface TicketFormProps {
     customers: {
         id: string;
         name: string;
     }[];
+    ticket?: {
+        id: string;
+        name: string;
+        description: string;
+        priority: "BAIXA" | "MEDIA" | "ALTA";
+        customerId: string | null;
+    }
 }
 
-export default function TicketForm({ customers }: TicketFormProps) {
+export default function TicketForm({ customers, ticket }: TicketFormProps) {
     const router = useRouter();
 
     const {
@@ -26,22 +33,28 @@ export default function TicketForm({ customers }: TicketFormProps) {
     } = useForm<TicketData>({
         resolver: zodResolver(ticketSchema),
         defaultValues: {
-            name: "",
-            description: "",
-            customerId: "",
-            priority: "BAIXA"
+            name: ticket?.name || "",
+            description: ticket?.description || "",
+            customerId: ticket?.customerId || "",
+            priority: ticket?.priority || "BAIXA"
         }
     });
 
     async function handleRegisterTicket(data: TicketData) {
-        const result = await createTicket(data);
+        let result;
+
+        if (ticket) {
+            result = await updateTicket(ticket.id, data);
+        } else {
+            result = await createTicket(data);
+        }
 
         if (result?.error) {
             toast.error(result.error);
             return;
         }
 
-        toast.success("Chamado aberto com sucesso!");
+        toast.success(ticket ? "Chamado atualizado!" : "Chamado aberto com sucesso!");
         router.refresh();
         router.replace("/dashboard");
     }
@@ -84,6 +97,7 @@ export default function TicketForm({ customers }: TicketFormProps) {
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                         : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     }`}
+                    disabled={!!ticket}
                     defaultValue=""
                     {...register("customerId")}
                 >
@@ -120,7 +134,7 @@ export default function TicketForm({ customers }: TicketFormProps) {
                     ${isSubmitting ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700"}
                 `}
             >
-                {isSubmitting ? <><FiLoader size={20} className="animate-spin" /> Salvando...</> : "Cadastrar Chamado"}
+                {isSubmitting ? <><FiLoader size={20} className="animate-spin" /> Salvando...</> : (ticket ? "Salvar Alterações" : "Cadastrar Chamado")}
             </button>
 
         </form>

@@ -40,3 +40,40 @@ export async function createTicket(data: TicketData) {
         return { error: "Erro interno ao cadastrar chamado." };
     }
 }
+
+export async function updateTicket(id: string, data: TicketData) {
+    const user = await getAuthenticatedUser();
+    if (!user) return { error: "Não autorizado" };
+
+    const validation = ticketSchema.safeParse(data);
+    if (!validation.success) return { error: "Dados inválidos" };
+
+    try {
+        const ticket = await prismaClient.ticket.findFirst({
+            where: {
+                id: id,
+                customer: {
+                    userId: user.id
+                }
+            }
+        });
+
+        if (!ticket) return { error: "Chamado não encontrado." };
+
+        await prismaClient.ticket.update({
+            where: { id },
+            data: {
+                name: validation.data.name,
+                description: validation.data.description,
+                priority: validation.data.priority,
+                status: "ABERTO"
+            }
+        });
+
+        revalidatePath("/dashboard");
+        return { success: true };
+
+    } catch (e) {
+        return { error: "Erro ao atualizar chamado." };
+    }
+}

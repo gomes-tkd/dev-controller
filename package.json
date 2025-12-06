@@ -8,14 +8,13 @@
     "start": "next start",
     "lint": "eslint"
   },
-  "prisma": {
-
-  },
+  "prisma": {},
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.19.0",
     "axios": "^1.13.2",
+    "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "next": "16.0.5",
     "next-auth": "^4.24.7",
@@ -25,6 +24,7 @@
     "react-icons": "^5.5.0",
     "recharts": "^3.5.1",
     "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

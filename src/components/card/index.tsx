@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CustomerProps from "@/utils/customer.type";
+import CustomerProps from "@/utils/customer-type";
 import apiAxios from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

@@ -6,21 +6,40 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/input";
 import { toast } from "sonner";
 import { FiLoader } from "react-icons/fi";
-import { customerSchema, CustomerData } from "@/lib/schema";
-import apiAxios from "@/lib/api";
+import { customerSchema } from "@/lib/schema"; // Importe o schema
 import { useRouter } from "next/navigation";
+import { createCustomer, updateCustomer } from "@/actions/customer"; // Nossas Server Actions
+import { z } from "zod";
 
-export default function NewCustomerForm({ userId }: { userId: string }) {
+type CustomerData = z.infer<typeof customerSchema>;
+
+interface CustomerFormProps {
+    userId: string;
+    customer?: {
+        id: string;
+        name: string;
+        phone: string;
+        email: string;
+        address: string | null;
+    }
+}
+
+export default function CustomerForm({ userId, customer }: CustomerFormProps) {
     const router = useRouter();
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-        reset,
         setValue
     } = useForm<CustomerData>({
-        resolver: zodResolver(customerSchema)
+        resolver: zodResolver(customerSchema),
+        defaultValues: {
+            name: customer?.name || "",
+            phone: customer?.phone || "",
+            email: customer?.email || "",
+            address: customer?.address || "",
+        }
     });
 
     const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,24 +47,26 @@ export default function NewCustomerForm({ userId }: { userId: string }) {
         value = value.replace(/\D/g, "");
         value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
         value = value.replace(/(\d)(\d{4})$/, "$1-$2");
-
         setValue("phone", value);
     };
 
-    function delay(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async function handleRegisterCustomer(data: CustomerData) {
-        await apiAxios.post("/api/customer", {
-            ...data,
-            userId
-        });
+        let result;
 
-        toast.success("Cliente cadastrado com sucesso!");
-        reset();
+        if (customer) {
+            result = await updateCustomer(customer.id, data);
+        } else {
+            result = await createCustomer(data);
+        }
 
-        await delay(2000);
+        if (result.error) {
+            toast.error(result.error);
+            return;
+        }
+
+        toast.success(customer ? "Cliente atualizado com sucesso!" : "Cliente cadastrado com sucesso!");
+
+        router.refresh();
         router.replace("/dashboard/customer");
     }
 
@@ -113,7 +134,11 @@ export default function NewCustomerForm({ userId }: { userId: string }) {
                     ${isSubmitting ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700"}
                 `}
             >
-                {isSubmitting ? <><FiLoader size={20} className="animate-spin" /> Salvando...</> : "Cadastrar Cliente"}
+                {isSubmitting ? (
+                    <><FiLoader size={20} className="animate-spin" /> Salvando...</>
+                ) : (
+                    customer ? "Salvar Alterações" : "Cadastrar Cliente"
+                )}
             </button>
         </form>
     );

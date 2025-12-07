@@ -18,10 +18,7 @@ export default function DashboardCharts({ ticketsByStatus, ticketsByCustomer }: 
 
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-800 mb-4">Status dos Chamados</h3>
-                {/* h-64 equivale a 256px */}
                 <div className="h-64 w-full">
-                    {/* SOLUÇÃO: height={256} garante que o JS saiba o tamanho antes do CSS carregar */}
-                    {/* Se preferir manter 100%, adicione minHeight ou style={{ minHeight: '250px' }} na div pai */}
                     <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                         <PieChart>
                             <Pie

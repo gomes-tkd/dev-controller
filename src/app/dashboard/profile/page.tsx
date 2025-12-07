@@ -1,8 +1,9 @@
 import Container from "@/components/ui/container";
 import { getAuthenticatedUser } from "@/lib/current-user";
 import { redirect } from "next/navigation";
-import ProfileForm from "@/components/profile/form"; // Vamos criar logo abaixo
-import { FiUser, FiCreditCard, FiTrash2 } from "react-icons/fi";
+import ProfileForm from "@/components/profile/form";
+import DangerZone from "@/components/profile/delete-account-danger-zone";
+import { FiUser, FiCreditCard } from "react-icons/fi";
 
 export default async function ProfilePage() {
     const user = await getAuthenticatedUser();
@@ -57,20 +58,7 @@ export default async function ProfilePage() {
                             </button>
                         </div>
 
-                        <div className="bg-red-50 p-6 border border-red-100 rounded-lg">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="bg-red-100 p-2 rounded-full text-red-600">
-                                    <FiTrash2 size={20} />
-                                </div>
-                                <h2 className="font-bold text-red-700">Zona de Perigo</h2>
-                            </div>
-                            <p className="text-sm text-red-600/80 mb-4">
-                                Ao deletar sua conta, todos os seus tickets e clientes serão removidos permanentemente.
-                            </p>
-                            <button className="text-red-600 text-sm font-bold hover:underline">
-                                Quero deletar minha conta
-                            </button>
-                        </div>
+                        <DangerZone />
 
                     </div>
                 </div>

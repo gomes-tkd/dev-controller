@@ -8,39 +8,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Customer {
-  id         String    @id @default(uuid())
-  name       String
-  phone      String
-  email      String
-  address    String?
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
-
-  userId String?
-  User   User?   @relation(fields: [userId], references: [id])
-
-  tickets Ticket[]
-}
-
-model Ticket {
-  id          String    @id @default(uuid())
-  name        String
-  description String
-  status      String
-  priority    String    @default("BAIXA")
-  created_at  DateTime? @default(now())
-  updated_at  DateTime? @default(now())
-
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
-
-  userId String?
-  User   User?   @relation(fields: [userId], references: [id])
-}
-
 model Account {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -59,7 +28,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(uuid())
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -67,16 +36,22 @@ model Session {
 }
 
 model User {
-  id            String     @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  accounts      Account[]
-  sessions      Session[]
-  tickets       Ticket[]
-  customers     Customer[]
+
+  teamId String?
+  Team   Team?   @relation(fields: [teamId], references: [id])
+
+  accounts     Account[]
+  sessions     Session[]
+  tickets      Ticket[]
+  customers    Customer[]
+  interactions Interaction[]
+  articles     Article[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -88,4 +63,91 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  customers Customer[]
+
+  invitations Invitation[]
+}
+
+model Customer {
+  id         String    @id @default(uuid())
+  name       String
+  phone      String
+  email      String
+  address    String?
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+
+  teamId String?
+  Team   Team?   @relation(fields: [teamId], references: [id])
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  status      String    @default("ABERTO")
+  priority    String    @default("BAIXA")
+  dueDate     DateTime?
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+
+  interactions Interaction[]
+}
+
+model Interaction {
+  id         String   @id @default(uuid())
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+}
+
+model Article {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+}
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDENTE")
+  createdAt DateTime @default(now())
+
+  @@unique([email, teamId])
 }

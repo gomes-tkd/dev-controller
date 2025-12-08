@@ -2,7 +2,7 @@ import React from "react";
 import Container from "@/components/ui/container";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import TicketItem from "@/components/dashboard/ticket";
+import TicketItem from "@/components/dashboard/ticket-item";
 import DashboardStats from "@/components/dashboard/dashboard-stats";
 import HeaderSearch from "@/components/dashboard/dashboard-header-search";
 import DashboardCharts from "@/components/dashboard/dashboard-charts";
@@ -18,18 +18,16 @@ interface DashboardProps {
 
 export default async function DashboardPage({ searchParams }: DashboardProps) {
     const user = await getAuthenticatedUser();
-
     if (!user) {
         redirect("/");
     }
 
     const params = await searchParams;
+    const searchText = typeof params.q === "string" ? params.q : undefined;
+    const statusFilter = typeof params.status === "string" ? params.status : undefined;
+    const priorityFilter = typeof params.priority === "string" ? params.priority : undefined;
 
-    const searchText = typeof params.q === 'string' ? params.q : undefined;
-    const statusFilter = typeof params.status === 'string' ? params.status : undefined;
-    const priorityFilter = typeof params.priority === 'string' ? params.priority : undefined; // <--- NOVO
-
-    const page = typeof params.page === 'string' ? Number(params.page) : 1;
+    const page = typeof params.page === "string" ? Number(params.page) : 1;
     const currentPage = isNaN(page) || page < 1 ? 1 : page;
 
     const dashboard = await getDashboardData(
@@ -41,88 +39,74 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     );
 
     return (
-        <Container>
-            <main className="mt-9 mb-2">
+        <div className="flex flex-col min-h-screen">
+            <main className="flex-1">
+                <Container>
+                    <div className="mt-9 mb-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                                <FilterStatus />
+                                <FilterPriority />
+                                <HeaderSearch />
+                                <Link
+                                    href="/dashboard/new"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 h-10 flex items-center justify-center rounded-md font-medium transition-colors shadow-sm whitespace-nowrap w-full sm:w-auto cursor-pointer"
+                                >
+                                    Abrir chamado
+                                </Link>
+                            </div>
+                        </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+                        <DashboardStats
+                            totalCustomers={dashboard.stats.totalCustomers}
+                            totalTickets={dashboard.stats.totalTickets}
+                            openTickets={dashboard.stats.openTickets}
+                        />
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-                        <FilterStatus />
-                        <FilterPriority />
-                        <HeaderSearch />
+                        <DashboardCharts
+                            ticketsByStatus={dashboard.charts.status}
+                            ticketsByCustomer={dashboard.charts.customers}
+                        />
 
-                        <Link
-                            href="/dashboard/new"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 h-10 flex items-center justify-center rounded-md font-medium transition-colors shadow-sm whitespace-nowrap w-full sm:w-auto"
-                        >
-                            Abrir chamado
-                        </Link>
+                        <div className="my-10 border-b border-slate-200"></div>
+
+                        <div className="overflow-x-auto border border-slate-200 rounded-lg shadow-sm bg-white">
+                            <table className="min-w-full divide-y divide-slate-200">
+                                <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-4 py-3 text-left w-48 text-xs font-bold text-slate-500 uppercase">Cliente</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Assunto</th>
+                                    <th className="hidden lg:table-cell px-4 py-3 text-left w-32 text-xs font-bold text-slate-500 uppercase">Criação</th>
+                                    <th className="px-4 py-3 text-left w-32 text-xs font-bold text-slate-500 uppercase">Vencimento</th>
+                                    <th className="hidden md:table-cell px-4 py-3 text-left w-32 text-xs font-bold text-slate-500 uppercase">Prioridade</th>
+                                    <th className="px-4 py-3 text-left w-32 text-xs font-bold text-slate-500 uppercase">Status</th>
+                                    <th className="px-4 py-3 text-right w-24 text-xs font-bold text-slate-500 uppercase pr-6">Ações</th>
+                                </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200">
+                                {dashboard.tickets.map((ticket) => (
+                                    <TicketItem key={ticket.id} ticket={ticket} />
+                                ))}
+                                </tbody>
+                            </table>
+
+                            {dashboard.tickets.length === 0 && (
+                                <div className="text-center p-12">
+                                    <p className="text-slate-500 text-sm italic">Nenhum chamado encontrado.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {dashboard.tickets.length > 0 && (
+                            <Pagination
+                                currentPage={dashboard.pagination.currentPage}
+                                totalPages={dashboard.pagination.totalPages}
+                            />
+                        )}
                     </div>
-                </div>
-
-                <DashboardStats
-                    totalCustomers={dashboard.stats.totalCustomers}
-                    totalTickets={dashboard.stats.totalTickets}
-                    openTickets={dashboard.stats.openTickets}
-                />
-
-                <DashboardCharts
-                    ticketsByStatus={dashboard.charts.status}
-                    ticketsByCustomer={dashboard.charts.customers}
-                />
-
-                <div className="my-6 border-b border-slate-200"></div>
-
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-slate-700">Últimos Chamados</h2>
-                    {(searchText || statusFilter || priorityFilter) && (
-                        <div className="flex gap-2 items-center">
-                            <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">
-                                Filtros ativos
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="overflow-x-auto mt-2 border border-slate-200 rounded-lg shadow-sm">
-                    <table className="min-w-full divide-y divide-slate-200 bg-white">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                            <th className="px-4 py-3 text-left w-48">Cliente</th>
-                            <th className="px-4 py-3 text-left">Assunto</th>
-                            <th className="hidden px-4 py-3 text-left sm:table-cell w-32">Data</th>
-                            <th className="hidden px-4 py-3 text-left md:table-cell w-32">Prioridade</th>
-                            <th className="px-4 py-3 text-left w-32">Status</th>
-                            <th className="px-4 py-3 text-center w-24">Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 bg-white">
-                        {dashboard.tickets.map((ticket) => (
-                            <TicketItem key={ticket.id} ticket={ticket} />
-                        ))}
-                        </tbody>
-                    </table>
-
-                    {dashboard.tickets.length === 0 && (
-                        <div className="text-center p-10 bg-white">
-                            <p className="text-slate-500 text-sm">
-                                {searchText || statusFilter || priorityFilter
-                                    ? "Nenhum chamado encontrado com os filtros selecionados."
-                                    : "Você ainda não possui chamados registrados."}
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                {dashboard.tickets.length > 0 && (
-                    <Pagination
-                        currentPage={dashboard.pagination.currentPage}
-                        totalPages={dashboard.pagination.totalPages}
-                    />
-                )}
-
+                </Container>
             </main>
-        </Container>
+        </div>
     );
 }

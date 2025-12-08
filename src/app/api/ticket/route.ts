@@ -1,78 +1,40 @@
 import { NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/lib/current-user";
 import prismaClient from "@/lib/prisma";
+import emailService from "@/services/email-service";
 
-export async function PATCH(request: Request) {
-    const user = await getAuthenticatedUser();
-
-    if (!user) {
-        return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const { id, status } = await request.json();
-
-    if (!id || !status) {
-        return NextResponse.json({ error: "ID e Status são obrigatórios" }, { status: 400 });
-    }
-
+export async function POST(request: Request) {
     try {
-        const ticketCheck = await prismaClient.ticket.findFirst({
-            where: { id: id as string }
-        });
+        const body = await request.json();
+        const { name, description, email, priority } = body;
 
-        if (!ticketCheck) {
-            return NextResponse.json({ error: "Chamado não encontrado" }, { status: 404 });
+        if (!name || !description || !email) {
+            return new NextResponse("Dados incompletos", { status: 400 });
         }
 
-        await prismaClient.ticket.update({
-            where: { id: id as string },
+        const customerFound = await prismaClient.customer.findFirst({
+            where: { email: email }
+        });
+
+        if (!customerFound) {
+            return NextResponse.json({ error: "Cliente não encontrado." }, { status: 404 });
+        }
+
+        const ticket = await prismaClient.ticket.create({
             data: {
-                status: status
+                name,
+                description,
+                status: "ABERTO",
+                priority: priority || "BAIXA",
+                customerId: customerFound.id,
+                userId: customerFound.userId
             }
         });
 
-        return NextResponse.json({ message: "Status atualizado!" }, { status: 200 });
+        await emailService.sendTicketCreated(email, ticket.id, ticket.name);
 
-    } catch (e) {
-        return NextResponse.json({ error: "Falha ao atualizar ticket" }, { status: 500 });
-    }
-}
+        return NextResponse.json(ticket);
 
-export async function DELETE(request: Request) {
-    const user = await getAuthenticatedUser();
-
-    if (!user) {
-        return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-        return NextResponse.json({ error: "ID é obrigatório" }, { status: 400 });
-    }
-
-    try {
-        const ticketCheck = await prismaClient.ticket.findFirst({
-            where: {
-                id: id as string,
-                customer: {
-                    userId: user.id
-                }
-            }
-        });
-
-        if (!ticketCheck) {
-            return NextResponse.json({ error: "Ticket não encontrado ou não autorizado" }, { status: 404 });
-        }
-
-        await prismaClient.ticket.delete({
-            where: { id: id as string }
-        });
-
-        return NextResponse.json({ message: "Ticket removido com sucesso!" }, { status: 200 });
-
-    } catch (e) {
-        return NextResponse.json({ error: "Falha ao remover ticket" }, { status: 500 });
+    } catch (error) {
+        return new NextResponse("Erro interno", { status: 500 });
     }
 }

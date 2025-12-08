@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import TicketPublicForm from "@/components/open-ticket/public-form";
-import SuccessMessage from "@/components/open-ticket/success-message";
+import TicketPublicForm from "@/components/ticket/open-ticket-public-form";
+import SuccessMessage from "@/components/ticket/open-ticket-success-message";
 
 export default function OpenTicketPage() {
     const [success, setSuccess] = useState(false);

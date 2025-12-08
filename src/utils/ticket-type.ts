@@ -3,7 +3,8 @@ export default interface TicketProps {
     name: string;
     customer: string | undefined;
     description: string;
-    date: string | undefined;
+    date: string;
     status: string;
     priority: string;
+    dueDate: Date | string | null;
 }

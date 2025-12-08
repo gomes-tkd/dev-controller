@@ -8,13 +8,18 @@ export default async function getDashboardData(
     status?: string,
     priority?: string
 ) {
+    const userWithTeam = await prismaClient.user.findUnique({
+        where: { id: userId },
+        select: { teamId: true }
+    });
+
+    const scopeFilter = { teamId: userWithTeam?.teamId };
+
     const ITEMS_PER_PAGE = 10;
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const whereClause: Prisma.TicketWhereInput = {
-        customer: {
-            userId: userId
-        }
+        customer: scopeFilter
     };
 
     if (searchText) {
@@ -43,9 +48,9 @@ export default async function getDashboardData(
         topCustomersRaw,
         filteredTicketsCount
     ] = await Promise.all([
-        prismaClient.customer.count({ where: { userId } }),
-        prismaClient.ticket.count({ where: { customer: { userId } } }),
-        prismaClient.ticket.count({ where: { customer: { userId }, status: "ABERTO" } }),
+        prismaClient.customer.count({ where: scopeFilter }),
+        prismaClient.ticket.count({ where: { customer: scopeFilter } }),
+        prismaClient.ticket.count({ where: { customer: scopeFilter, status: "ABERTO" } }),
 
         prismaClient.ticket.findMany({
             where: whereClause,
@@ -57,11 +62,11 @@ export default async function getDashboardData(
 
         prismaClient.ticket.groupBy({
             by: ['status'],
-            where: { customer: { userId } },
+            where: { customer: scopeFilter },
             _count: { status: true }
         }),
         prismaClient.customer.findMany({
-            where: { userId },
+            where: scopeFilter,
             select: { name: true, _count: { select: { tickets: true } } },
             take: 5,
             orderBy: { tickets: { _count: 'desc' } }
@@ -78,12 +83,16 @@ export default async function getDashboardData(
         customer: ticket.customer?.name || "Cliente Desconhecido",
         date: ticket.created_at ? ticket.created_at.toLocaleDateString("pt-BR") : "",
         status: ticket.status,
-        priority: ticket.priority
+        priority: ticket.priority,
+        dueDate: ticket.dueDate
     }));
 
     return {
         stats: { totalCustomers: totalCustomers || 0, totalTickets: totalTickets || 0, openTickets: openTickets || 0 },
-        charts: { status: ticketsByStatusRaw.map(i => ({ name: i.status, value: i._count.status })), customers: topCustomersRaw.map(i => ({ name: i.name, tickets: i._count.tickets })) },
+        charts: {
+            status: ticketsByStatusRaw.map(i => ({ name: i.status, value: i._count.status })),
+            customers: topCustomersRaw.map(i => ({ name: i.name, tickets: i._count.tickets }))
+        },
         tickets: tickets,
         pagination: {
             total: filteredTicketsCount,

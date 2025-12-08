@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prismaClient from "@/lib/prisma";
 import { customerSchema } from "@/lib/schema";
-import { getAuthenticatedUser } from "@/lib/current-user"; // Importe o helper
+import { getAuthenticatedUser } from "@/lib/current-user";
 
 export async function DELETE(request: Request) {
     const user = await getAuthenticatedUser();
@@ -9,8 +9,6 @@ export async function DELETE(request: Request) {
     if (!user) {
         return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
-
-
 
     try {
         const { searchParams } = new URL(request.url);
